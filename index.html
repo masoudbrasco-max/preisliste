@@ -9,41 +9,97 @@ body {
     font-family: Arial;
     background: #111;
     color: white;
-    text-align: center;
     margin: 0;
-    padding: 20px;
+    padding: 15px;
 }
 
 .logo {
+    text-align: center;
     font-size: 32px;
     font-weight: bold;
-    margin-bottom: 10px;
 }
 
 .trade { color: red; }
 .station { color: white; }
 
-h2 {
-    margin-bottom: 20px;
-}
-
-table {
-    width: 95%;
-    margin: 20px auto;
-    border-collapse: collapse;
-}
-
-td, th {
-    border: 1px solid #333;
-    padding: 8px;
+.search {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
 }
 
 .card {
-    background: #222;
+    background: #1c1c1c;
     padding: 15px;
     margin-bottom: 15px;
-    border-radius: 10px;
-    text-align: left;
+    border-radius: 12px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+}
+
+button {
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.qty {
+    width: 50px;
+    text-align: center;
+}
+
+.cart-box {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000;
+    padding: 10px;
+    border-top: 2px solid red;
+    max-height: 40%;
+    overflow-y: auto;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
+
+.remove {
+    background: #333;
+}
+
+.total {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+input.user {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+    border: none;
+}
+
+.whatsapp {
+    width: 100%;
+    padding: 12px;
+    background: green;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: 10px;
 }
 </style>
 
@@ -54,13 +110,25 @@ td, th {
     <span class="trade">trade</span><span class="station">station</span>
 </div>
 
-<h2>preisliste</h2>
+<input class="search" placeholder="suche iphone..." onkeyup="searchItems(this.value)">
 
-<div id="content">
-    lade daten...
+<div id="content"></div>
+
+<div class="cart-box">
+    <div id="cart"></div>
+    <div class="total" id="total">gesamt: 0€</div>
+
+    <input class="user" id="name" placeholder="dein name">
+    <input class="user" id="note" placeholder="notiz (optional)">
+
+    <button class="whatsapp" onclick="sendWhatsApp()">📲 Bestellung senden</button>
 </div>
 
 <script>
+
+const phoneNumber = "4915238242082";
+let cart = [];
+
 const sheetURL = "https://docs.google.com/spreadsheets/d/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/gviz/tq?tqx=out:json";
 
 fetch(sheetURL)
@@ -71,30 +139,117 @@ fetch(sheetURL)
 
     let html = "";
 
-    rows.forEach(row => {
-        let cols = row.c;
+    rows.forEach((row, index) => {
+        let c = row.c;
+        if (!c || !c[0]) return;
 
-        if (!cols || !cols[0]) return;
+        let model = c[0]?.v || "";
 
-        html += `
-        <div class="card">
-            <strong>${cols[0]?.v || ""}</strong><br>
-            incell: ${cols[1]?.v || "-"} €<br>
-            fhd: ${cols[2]?.v || "-"} €<br>
-            hard oled: ${cols[3]?.v || "-"} €<br>
-            soft oled: ${cols[4]?.v || "-"} €<br>
-            akku: ${cols[5]?.v || "-"} €<br>
-            diagnostic akku: ${cols[6]?.v || "-"} €
-        </div>
-        `;
+        html += `<div class="card item-card" data-name="${model.toLowerCase()}">
+        <strong>${model}</strong>`;
+
+        const types = ["incell", "fhd", "hard oled", "soft oled", "akku", "diagnostic"];
+
+        types.forEach((type, i) => {
+            let price = c[i+1]?.v;
+
+            if(price && price !== "-") {
+                html += `
+                <div class="item">
+                    ${type}: ${price}€
+                    <div>
+                        <input class="qty" type="number" min="1" value="1" id="qty-${index}-${i}">
+                        <button onclick="addToCart('${model}', '${type}', ${price}, ${index}, ${i})">+</button>
+                    </div>
+                </div>`;
+            }
+        });
+
+        html += `</div>`;
     });
 
     document.getElementById("content").innerHTML = html;
-})
-.catch(err => {
-    document.getElementById("content").innerHTML = "fehler beim laden der daten";
-    console.error(err);
 });
+
+function addToCart(model, type, price, row, col) {
+    let qty = parseInt(document.getElementById(`qty-${row}-${col}`).value);
+
+    let existing = cart.find(item => item.name === model + " " + type);
+
+    if(existing) {
+        existing.qty += qty;
+    } else {
+        cart.push({
+            name: model + " " + type,
+            price: price,
+            qty: qty
+        });
+    }
+
+    updateCart();
+}
+
+function updateCart() {
+    let html = "";
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        total += item.price * item.qty;
+
+        html += `
+        <div class="cart-item">
+            ${item.qty}x ${item.name}
+            <button class="remove" onclick="removeItem(${index})">x</button>
+        </div>`;
+    });
+
+    document.getElementById("cart").innerHTML = html;
+    document.getElementById("total").innerText = "gesamt: " + total + "€";
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    updateCart();
+}
+
+function sendWhatsApp() {
+    if(cart.length === 0) {
+        alert("warenkorb leer");
+        return;
+    }
+
+    let name = document.getElementById("name").value;
+    let note = document.getElementById("note").value;
+
+    let message = "Hallo, ich möchte bestellen:%0A%0A";
+
+    if(name) message += "Name: " + name + "%0A";
+
+    cart.forEach(item => {
+        message += `${item.qty}x ${item.name} (${item.price}€)%0A`;
+    });
+
+    message += "%0Agesamt: " + document.getElementById("total").innerText.replace("gesamt: ", "");
+
+    if(note) message += "%0A%0Anotiz: " + note;
+
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+}
+
+function searchItems(value) {
+    let cards = document.querySelectorAll(".item-card");
+
+    cards.forEach(card => {
+        let name = card.getAttribute("data-name");
+
+        if(name.includes(value.toLowerCase())) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
 </script>
 
 </body>
