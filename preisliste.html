@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>tradestation preisliste</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.trade { color: red; }
+.station { color: white; }
+
+table {
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #333;
+    padding: 8px;
+}
+
+input {
+    width: 70px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+/* Nur Inputs sperren */
+.locked input {
+    pointer-events: none;
+    color: #888;
+}
+
+button {
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.login-box {
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="logo">
+<span class="trade">trade</span><span class="station">station</span>
+</div>
+
+<h2>preisliste</h2>
+
+<div class="login-box">
+<input type="password" id="pass" placeholder="admin passwort">
+<br>
+<button onclick="login()">login</button>
+<button onclick="logout()">logout</button>
+</div>
+
+<table id="table" class="locked">
+<tr>
+<th>modell</th>
+<th>incell</th>
+<th>fhd</th>
+<th>hard oled</th>
+<th>soft oled</th>
+<th>akku</th>
+<th>diagnostic akku</th>
+</tr>
+
+<tr><td>iphone 8</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 8 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone x</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone xr</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone xs</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone xs max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 11</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 11 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 11 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 12</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 12 mini</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 12 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 12 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 13</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 13 mini</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 13 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 13 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 14</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 14 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 14 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 14 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 15</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 15 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 15 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 15 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 16</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 16 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 16 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 16 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+<tr><td>iphone 17</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 17 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 17 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+<tr><td>iphone 17 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
+
+</table>
+
+<script>
+function login() {
+    let pass = document.getElementById("pass").value;
+
+    if (pass === "1234") {
+        document.getElementById("table").classList.remove("locked");
+        alert("bearbeiten aktiviert");
+    } else {
+        alert("falsches passwort");
+    }
+}
+
+function logout() {
+    document.getElementById("table").classList.add("locked");
+    document.getElementById("pass").value = "";
+    alert("bearbeiten deaktiviert");
+}
+</script>
+
+</body>
+</html>
