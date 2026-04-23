@@ -3,84 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Preisliste</title>
+<title>preisliste</title>
 
 <style>
 body {
-    background: #111;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-    margin: 0;
-    padding-bottom: 140px; /* 🔥 FIX für Überlappung unten */
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
 .logo {
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 20px;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 .trade { color: red; }
 .station { color: white; }
 
 #search {
-    width: 90%;
-    padding: 10px;
-    margin: 20px;
-    border-radius: 10px;
-    border: none;
+  width: 95%;
+  padding: 10px;
+  margin: 15px auto;
+  border-radius: 8px;
+  border: none;
 }
 
 .card {
-    background: #222;
-    margin: 10px;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: left;
+  background: #222;
+  padding: 15px;
+  margin: 10px auto;
+  border-radius: 10px;
+  width: 95%;
+  text-align: left;
 }
 
-/* 🔥 NEU: ROW FLEX für rechts ausrichten */
 .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
 }
 
-.row-left {
-    text-align: left;
-}
-
-.row-right {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 button {
-    background: red;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
 }
 
-.bottom {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: black;
-    padding: 10px;
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: black;
+  padding: 10px;
 }
 
-.whatsapp {
-    background: green;
-    width: 95%;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    color: white;
-    margin-top: 10px;
+input {
+  width: 48%;
+  padding: 8px;
+  margin: 5px 0;
+}
+
+.send {
+  background: green;
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 6px;
 }
 </style>
 </head>
@@ -88,123 +87,146 @@ button {
 <body>
 
 <div class="logo">
-<span class="trade">trade</span><span class="station">station</span>
+  <span class="trade">trade</span><span class="station">station</span>
 </div>
 
-<h3>preisliste</h3>
+<h2>preisliste</h2>
 
 <input type="text" id="search" placeholder="suche iphone...">
 
 <div id="list">lade daten...</div>
 
-<div class="bottom">
-<div id="total">gesamt: 0 €</div>
-<input id="name" placeholder="dein name">
-<input id="note" placeholder="notiz (optional)">
-<button class="whatsapp" onclick="sendWhatsApp()">Bestellung senden</button>
+<div class="footer">
+  <div>gesamt: <span id="total">0</span> €</div>
+
+  <!-- NEU: Standort Auswahl -->
+  <select id="location" style="width:100%; padding:10px; margin-bottom:5px;">
+    <option value="offenbach">Offenbach</option>
+    <option value="kassel">Kassel</option>
+  </select>
+
+  <input id="name" placeholder="dein name">
+  <input id="note" placeholder="notiz (optional)">
+
+  <button class="send" onclick="sendWhatsApp()">Bestellung senden</button>
 </div>
 
 <script>
-const sheetURL = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/iphone_preise";
-
 let cart = {};
 
-fetch(sheetURL)
+fetch("https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/iphone_preise")
 .then(res => res.json())
 .then(data => render(data))
-.catch(() => {
-    document.getElementById("list").innerHTML = "❌ Fehler beim Laden";
+.catch(err => {
+  document.getElementById("list").innerHTML = "❌ fehler beim laden (freigabe prüfen)";
 });
 
 function render(data){
-    let html = "";
+  let html = "";
+  data.forEach(item => {
+    if(!item.Modell) return;
 
-    data.forEach(item => {
+    html += `<div class="card">
+      <b>${item.Modell}</b>
+      ${row(item, "Display InCell")}
+      ${row(item, "FHD")}
+      ${row(item, "Hard OLED")}
+      ${row(item, "Soft OLED")}
+      ${row(item, "Akku")}
+      ${row(item, "Akku Diagnose")}
+    </div>`;
+  });
 
-        html += `
-        <div class="card">
-            <b>${item.Modell}</b><br>
-
-            ${row(item,"Display InCell")}
-            ${row(item,"FHD")}
-            ${row(item,"Hard OLED")}
-            ${row(item,"Soft OLED")}
-            ${row(item,"Akku")}
-            ${row(item,"Akku Diagnose")}
-        </div>
-        `;
-    });
-
-    document.getElementById("list").innerHTML = html;
+  document.getElementById("list").innerHTML = html;
 }
 
-function row(item,type){
-    if(!item[type]) return "";
+function row(item, type){
+  if(!item[type] || item[type] === "-") return "";
 
-    const key = item.Modell + "-" + type;
-
-    return `
-    <div class="row">
-        <div class="row-left">
-            ${type}: ${item[type]}€
-        </div>
-
-        <div class="row-right">
-            <button onclick="change('${item.Modell}','${type}',${item[type]},-1)">-</button>
-            <span id="${key}">0</span>
-            <button onclick="change('${item.Modell}','${type}',${item[type]},1)">+</button>
-        </div>
+  return `
+  <div class="row">
+    <span>${type}: ${item[type]}€</span>
+    <div class="controls">
+      <button onclick="changeQty('${item.Modell}','${type}',${item[type]},-1)">-</button>
+      <span id="${item.Modell}_${type}">0</span>
+      <button onclick="changeQty('${item.Modell}','${type}',${item[type]},1)">+</button>
     </div>
-    `;
+  </div>`;
 }
 
-function change(model,type,price,change){
-    const key = model+"-"+type;
+function changeQty(model,type,price,change){
+  const key = model + "_" + type;
 
-    if(!cart[key]){
-        cart[key] = {model,type,price,qty:0};
-    }
+  if(!cart[key]){
+    cart[key] = {model,type,price,qty:0};
+  }
 
-    cart[key].qty += change;
+  cart[key].qty += change;
 
-    if(cart[key].qty <= 0){
-        delete cart[key];
-    }
+  if(cart[key].qty <= 0){
+    delete cart[key];
+    document.getElementById(key).innerText = 0;
+  } else {
+    document.getElementById(key).innerText = cart[key].qty;
+  }
 
-    document.getElementById(key).innerText = cart[key]?.qty || 0;
-
-    updateTotal();
+  updateTotal();
 }
 
 function updateTotal(){
-    let total = 0;
+  let total = 0;
 
-    for(let k in cart){
-        total += cart[k].price * cart[k].qty;
-    }
+  for(let key in cart){
+    let item = cart[key];
+    total += item.price * item.qty;
+  }
 
-    document.getElementById("total").innerText = "gesamt: " + total + " €";
+  document.getElementById("total").innerText = total;
 }
 
 function sendWhatsApp(){
-    let text = "Bestellung:\n";
+  let text = "🛒 Bestellung:%0A";
+  let total = 0;
 
-    for(let k in cart){
-        let i = cart[k];
-        text += `${i.qty}x ${i.model} ${i.type} (${i.price}€)\n`;
-    }
+  for(let key in cart){
+    let item = cart[key];
+    let sum = item.price * item.qty;
+    total += sum;
 
-    text += "\nName: " + document.getElementById("name").value;
-    text += "\nNotiz: " + document.getElementById("note").value;
+    text += `${item.qty}x ${item.model} (${item.type}) = ${sum}€%0A`;
+  }
 
-    window.open("https://wa.me/4915238242082?text=" + encodeURIComponent(text));
+  text += "%0A💰 Gesamt: " + total + "€";
+
+  let name = document.getElementById("name").value;
+  let note = document.getElementById("note").value;
+
+  text += "%0A👤 Name: " + name;
+  text += "%0A📝 Notiz: " + note;
+
+  let location = document.getElementById("location").value;
+
+  let numbers = {
+    offenbach: "4915238242082",
+    kassel: "491772897314"
+  };
+
+  let number = numbers[location];
+
+  text += "%0A📍 Standort: " + location;
+
+  window.open(`https://wa.me/${number}?text=${text}`);
 }
 
 document.getElementById("search").addEventListener("input", function(){
-    const val = this.value.toLowerCase();
-    document.querySelectorAll(".card").forEach(c=>{
-        c.style.display = c.innerText.toLowerCase().includes(val) ? "block" : "none";
-    });
+  let input = this.value.toLowerCase();
+  let cards = document.querySelectorAll(".card");
+
+  cards.forEach(card => {
+    card.style.display = card.innerText.toLowerCase().includes(input)
+      ? "block"
+      : "none";
+  });
 });
 </script>
 
