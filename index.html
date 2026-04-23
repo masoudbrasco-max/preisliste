@@ -265,23 +265,6 @@ function send(){
   window.open(`https://wa.me/${number}?text=${text}`);
 }
 
-  text += `%0AGesamt: ${document.getElementById("total").innerText}€`;
-
-  let name = document.getElementById("name").value;
-  let note = document.getElementById("note").value;
-
-  if(name) text += `%0AName: ${name}`;
-  if(note) text += `%0ANotiz: ${note}`;
-
-  let location = document.getElementById("location").value;
-
-  let number = location === "kassel"
-    ? "491772897314"
-    : "4915238242082";
-
-  window.open(`https://wa.me/${number}?text=${text}`);
-}
-
 function search(val){
   val = val.toLowerCase();
   let filtered = data.filter(i =>
