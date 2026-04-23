@@ -11,242 +11,213 @@ body {
     color: white;
     margin: 0;
     padding: 15px;
+    padding-bottom: 260px;
 }
 
 .logo {
     text-align: center;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
 }
 
 .trade { color: red; }
 .station { color: white; }
 
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Suche */
 .search {
     width: 100%;
-    padding: 12px;
-    margin: 15px 0;
+    padding: 10px;
+    margin-bottom: 15px;
     border-radius: 8px;
     border: none;
-    font-size: 16px;
 }
 
+/* Karten */
 .card {
-    background: #1c1c1c;
+    background: #222;
     padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
 }
 
-.item {
+/* Produkt Zeile */
+.row {
     display: flex;
     justify-content: space-between;
-    margin: 6px 0;
-}
-
-button {
-    background: red;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.qty {
-    width: 50px;
-    text-align: center;
-}
-
-.cart-box {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #000;
-    padding: 10px;
-    border-top: 2px solid red;
-    max-height: 40%;
-    overflow-y: auto;
-}
-
-.cart-item {
-    display: flex;
-    justify-content: space-between;
+    align-items: center;
     margin: 5px 0;
 }
 
-.remove {
-    background: #333;
+/* Buttons */
+.controls {
+    display: flex;
+    align-items: center;
 }
 
-.total {
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-input.user {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    border-radius: 6px;
+.btn {
+    background: red;
     border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    margin: 0 3px;
+    font-size: 18px;
 }
 
-.whatsapp {
+.qty {
+    width: 30px;
+    text-align: center;
+}
+
+/* Warenkorb */
+.cart {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #000;
+    padding: 15px;
+    border-top: 2px solid red;
+}
+
+.cart input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+.cart button {
     width: 100%;
     padding: 12px;
-    background: green;
-    border-radius: 8px;
-    font-size: 16px;
     margin-top: 10px;
+    background: green;
+    border: none;
+    color: white;
+    font-size: 16px;
 }
-</style>
 
+</style>
 </head>
+
 <body>
 
 <div class="logo">
     <span class="trade">trade</span><span class="station">station</span>
 </div>
 
-<input class="search" placeholder="suche iphone..." onkeyup="searchItems(this.value)">
+<h2>preisliste</h2>
 
-<div id="content"></div>
+<input class="search" placeholder="suche iphone..." onkeyup="search()">
 
-<div class="cart-box">
-    <div id="cart"></div>
-    <div class="total" id="total">gesamt: 0€</div>
+<div id="list"></div>
 
-    <input class="user" id="name" placeholder="dein name">
-    <input class="user" id="note" placeholder="notiz (optional)">
-
-    <button class="whatsapp" onclick="sendWhatsApp()">📲 Bestellung senden</button>
+<div class="cart">
+    <div>gesamt: <span id="total">0</span> €</div>
+    <input id="name" placeholder="dein name">
+    <input id="note" placeholder="notiz (optional)">
+    <button onclick="sendWhatsApp()">📲 Bestellung senden</button>
 </div>
 
 <script>
 
-const phoneNumber = "4915238242082";
-let cart = [];
+// GOOGLE SHEETS LINK (DEINER IST SCHON DRIN)
+const sheetURL = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/Sheet1";
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/gviz/tq?tqx=out:json";
+let cart = {};
 
 fetch(sheetURL)
-.then(res => res.text())
+.then(res => res.json())
 .then(data => {
-    const json = JSON.parse(data.substring(47).slice(0, -2));
-    const rows = json.table.rows;
-
-    let html = "";
-
-    rows.forEach((row, index) => {
-        let c = row.c;
-        if (!c || !c[0]) return;
-
-        let model = c[0]?.v || "";
-
-        html += `<div class="card item-card" data-name="${model.toLowerCase()}">
-        <strong>${model}</strong>`;
-
-        const types = ["incell", "fhd", "hard oled", "soft oled", "akku", "diagnostic"];
-
-        types.forEach((type, i) => {
-            let price = c[i+1]?.v;
-
-            if(price && price !== "-") {
-                html += `
-                <div class="item">
-                    ${type}: ${price}€
-                    <div>
-                        <input class="qty" type="number" min="1" value="1" id="qty-${index}-${i}">
-                        <button onclick="addToCart('${model}', '${type}', ${price}, ${index}, ${i})">+</button>
-                    </div>
-                </div>`;
-            }
-        });
-
-        html += `</div>`;
-    });
-
-    document.getElementById("content").innerHTML = html;
+    render(data);
 });
 
-function addToCart(model, type, price, row, col) {
-    let qty = parseInt(document.getElementById(`qty-${row}-${col}`).value);
+function render(data){
+    let html = "";
 
-    let existing = cart.find(item => item.name === model + " " + type);
+    data.forEach(item => {
+        html += `
+        <div class="card">
+            <b>${item.modell}</b>
+            ${row(item, "incell")}
+            ${row(item, "fhd")}
+            ${row(item, "hard oled")}
+            ${row(item, "soft oled")}
+            ${row(item, "akku")}
+            ${row(item, "diagnostic akku")}
+        </div>
+        `;
+    });
 
-    if(existing) {
-        existing.qty += qty;
-    } else {
-        cart.push({
-            name: model + " " + type,
-            price: price,
-            qty: qty
-        });
-    }
-
-    updateCart();
+    document.getElementById("list").innerHTML = html;
 }
 
-function updateCart() {
-    let html = "";
+function row(item, type){
+    if(!item[type] || item[type] === "-") return "";
+
+    return `
+    <div class="row">
+        <span>${type}: ${item[type]}€</span>
+        <div class="controls">
+            <button class="btn" onclick="changeQty('${item.modell}','${type}', ${item[type]}, -1)">-</button>
+            <span id="${item.modell}-${type}" class="qty">0</span>
+            <button class="btn" onclick="changeQty('${item.modell}','${type}', ${item[type]}, 1)">+</button>
+        </div>
+    </div>
+    `;
+}
+
+function changeQty(model, type, price, change){
+    const key = model + "-" + type;
+
+    if(!cart[key]) cart[key] = {model, type, price, qty:0};
+
+    cart[key].qty += change;
+
+    if(cart[key].qty <= 0) delete cart[key];
+
+    update();
+}
+
+function update(){
     let total = 0;
 
-    cart.forEach((item, index) => {
+    for(let key in cart){
+        let item = cart[key];
         total += item.price * item.qty;
 
-        html += `
-        <div class="cart-item">
-            ${item.qty}x ${item.name}
-            <button class="remove" onclick="removeItem(${index})">x</button>
-        </div>`;
-    });
-
-    document.getElementById("cart").innerHTML = html;
-    document.getElementById("total").innerText = "gesamt: " + total + "€";
-}
-
-function removeItem(index) {
-    cart.splice(index, 1);
-    updateCart();
-}
-
-function sendWhatsApp() {
-    if(cart.length === 0) {
-        alert("warenkorb leer");
-        return;
+        document.getElementById(item.model + "-" + item.type).innerText = item.qty;
     }
 
-    let name = document.getElementById("name").value;
-    let note = document.getElementById("note").value;
-
-    let message = "Hallo, ich möchte bestellen:%0A%0A";
-
-    if(name) message += "Name: " + name + "%0A";
-
-    cart.forEach(item => {
-        message += `${item.qty}x ${item.name} (${item.price}€)%0A`;
-    });
-
-    message += "%0Agesamt: " + document.getElementById("total").innerText.replace("gesamt: ", "");
-
-    if(note) message += "%0A%0Anotiz: " + note;
-
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+    document.getElementById("total").innerText = total;
 }
 
-function searchItems(value) {
-    let cards = document.querySelectorAll(".item-card");
+function sendWhatsApp(){
+    let text = "bestellung:%0A";
+
+    for(let key in cart){
+        let i = cart[key];
+        text += `${i.qty}x ${i.model} ${i.type} = ${i.price*i.qty}€%0A`;
+    }
+
+    text += "%0Agesamt: " + document.getElementById("total").innerText + "€";
+    text += "%0Aname: " + document.getElementById("name").value;
+    text += "%0Anotiz: " + document.getElementById("note").value;
+
+    window.open("https://wa.me/4915238242082?text=" + text);
+}
+
+function search(){
+    let input = document.querySelector(".search").value.toLowerCase();
+    let cards = document.querySelectorAll(".card");
 
     cards.forEach(card => {
-        let name = card.getAttribute("data-name");
-
-        if(name.includes(value.toLowerCase())) {
-            card.style.display = "block";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
     });
 }
 
