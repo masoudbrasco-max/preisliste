@@ -11,6 +11,8 @@ body {
     color: white;
     font-family: Arial;
     text-align: center;
+    margin: 0;
+    padding-bottom: 140px; /* 🔥 FIX für Überlappung unten */
 }
 
 .logo {
@@ -38,13 +40,29 @@ body {
     text-align: left;
 }
 
+/* 🔥 NEU: ROW FLEX für rechts ausrichten */
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.row-left {
+    text-align: left;
+}
+
+.row-right {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 button {
     background: red;
     border: none;
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
-    margin-left: 5px;
 }
 
 .bottom {
@@ -93,9 +111,7 @@ let cart = {};
 
 fetch(sheetURL)
 .then(res => res.json())
-.then(data => {
-    render(data);
-})
+.then(data => render(data))
 .catch(() => {
     document.getElementById("list").innerHTML = "❌ Fehler beim Laden";
 });
@@ -128,11 +144,17 @@ function row(item,type){
     const key = item.Modell + "-" + type;
 
     return `
-    ${type}: ${item[type]}€
-    <button onclick="change('${item.Modell}','${type}',${item[type]},-1)">-</button>
-    <span id="${key}">0</span>
-    <button onclick="change('${item.Modell}','${type}',${item[type]},1)">+</button>
-    <br>
+    <div class="row">
+        <div class="row-left">
+            ${type}: ${item[type]}€
+        </div>
+
+        <div class="row-right">
+            <button onclick="change('${item.Modell}','${type}',${item[type]},-1)">-</button>
+            <span id="${key}">0</span>
+            <button onclick="change('${item.Modell}','${type}',${item[type]},1)">+</button>
+        </div>
+    </div>
     `;
 }
 
