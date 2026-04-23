@@ -229,11 +229,41 @@ function typeMap(type){
 
 function send(){
   let text = "Bestellung:%0A";
+  let total = 0;
 
   for(let key in cart){
     let [model,type] = key.split("-");
-    text += `${cart[key]}x ${model} ${type}%0A`;
+    let item = data.find(i => i["Modell"] === model);
+
+    if(item){
+      let field = typeMap(type);
+      let price = item[field];
+
+      if(price && !isNaN(price)){
+        let sum = price * cart[key];
+        total += sum;
+
+        text += `${cart[key]}x ${model} ${field} (${price}€) = ${sum}€%0A`;
+      }
+    }
   }
+
+  text += `%0AGesamt: ${total}€`;
+
+  let name = document.getElementById("name").value;
+  let note = document.getElementById("note").value;
+
+  if(name) text += `%0AName: ${name}`;
+  if(note) text += `%0ANotiz: ${note}`;
+
+  let location = document.getElementById("location").value;
+
+  let number = location === "kassel"
+    ? "491772897314"
+    : "4915238242082";
+
+  window.open(`https://wa.me/${number}?text=${text}`);
+}
 
   text += `%0AGesamt: ${document.getElementById("total").innerText}€`;
 
