@@ -8,40 +8,34 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: #000;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
   color: white;
-  padding-bottom: 220px;
 }
 
-h1 {
+.header {
   text-align: center;
+  padding: 20px;
+}
+
+.header h1 {
   color: red;
+  margin: 0;
 }
 
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-input, select {
-  width: 100%;
+.search {
+  width: 90%;
+  margin: 10px auto;
+  display: block;
   padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
-}
-
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 10px;
 }
 
 .card {
   background: #1a1a1a;
+  margin: 10px;
   padding: 15px;
-  margin-bottom: 15px;
   border-radius: 12px;
 }
 
@@ -49,141 +43,109 @@ input, select {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 5px 0;
+  margin: 6px 0;
 }
 
-.controls {
+.qty {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.btn {
+.qty button {
   background: red;
   border: none;
   color: white;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 6px;
+  font-weight: bold;
 }
 
-.qty {
-  min-width: 20px;
-  text-align: center;
-}
-
-.bottom-bar {
+.footer {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: #000;
-  border-top: 2px solid red;
+  background: black;
   padding: 10px;
-  z-index: 999;
+  border-top: 2px solid red;
+}
+
+.footer input, .footer select {
+  width: 95%;
+  margin: 5px auto;
+  display: block;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+.footer button {
+  width: 95%;
+  margin: 10px auto;
+  display: block;
+  padding: 12px;
+  background: green;
+  color: white;
+  border: none;
+  border-radius: 10px;
 }
 
 .total {
   text-align: center;
   margin-bottom: 5px;
 }
-
-button.send {
-  width: 100%;
-  padding: 12px;
-  background: green;
-  border: none;
-  color: white;
-  border-radius: 8px;
-}
 </style>
 </head>
 
 <body>
 
-<h1>tradestation</h1>
-<h2>preisliste</h2>
-
-<div class="container">
-<input id="search" placeholder="suche iphone...">
-<div id="list"></div>
+<div class="header">
+  <h1>tradestation</h1>
+  <p>preisliste</p>
 </div>
 
-<div class="bottom-bar">
-<div class="total">gesamt: <span id="total">0</span> €</div>
+<input class="search" placeholder="suche iphone..." oninput="search(this.value)">
 
-<select id="location">
-  <option value="offenbach">Offenbach</option>
-  <option value="kassel">Kassel</option>
-</select>
+<div id="list"></div>
 
-<input id="name" placeholder="dein name">
-<input id="note" placeholder="notiz (optional)">
+<div style="height:160px;"></div>
 
-<button class="send" onclick="send()">Bestellung senden</button>
+<div class="footer">
+  <div class="total">gesamt: <span id="total">0</span> €</div>
+
+  <select id="location">
+    <option value="offenbach">Offenbach</option>
+    <option value="kassel">Kassel</option>
+  </select>
+
+  <input id="name" placeholder="dein name">
+  <input id="note" placeholder="notiz (optional)">
+
+  <button onclick="send()">Bestellung senden</button>
 </div>
 
 <script>
+const SHEET = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/iphone_preise";
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/gviz/tq?tqx=out:json&sheet=iphone_preise";
+let data = [];
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
-/* 🔥 LOCAL STORAGE LADEN */
-let cart = {};
-let saved = localStorage.getItem("cart");
-if(saved){
-  cart = JSON.parse(saved);
-}
-
-fetch(sheetURL)
-.then(res => res.text())
-.then(text => {
-  const json = JSON.parse(text.substring(47).slice(0, -2));
-  const rows = json.table.rows.map(r => ({
-    Modell: r.c[0]?.v,
-    "Display InCell": r.c[1]?.v,
-    FHD: r.c[2]?.v,
-    "Hard OLED": r.c[3]?.v,
-    "Soft OLED": r.c[4]?.v,
-    Akku: r.c[5]?.v,
-    "Akku Diagnose": r.c[6]?.v
-  }));
-  render(rows);
-})
-.catch(() => {
-  document.getElementById("list").innerHTML = "❌ fehler beim laden";
+fetch(SHEET)
+.then(r => r.json())
+.then(json => {
+  data = json;
+  render(data);
 });
 
-function render(data){
-  let html = "";
-
-  data.forEach(item => {
-    if(!item.Modell) return;
-
-    let rows = "";
-    rows += row(item, "Display InCell", "incell");
-    rows += row(item, "FHD", "fhd");
-    rows += row(item, "Hard OLED", "hard");
-    rows += row(item, "Soft OLED", "soft");
-    rows += row(item, "Akku", "akku");
-    rows += row(item, "Akku Diagnose", "diag");
-
-    html += `<div class="card"><b>${item.Modell}</b>${rows}</div>`;
-  });
-
-  document.getElementById("list").innerHTML = html;
-
-  restoreCartUI();
-}
-
-/* ROW */
 function row(item, label, key){
   let price = item[label];
 
-  // 🔥 WICHTIG: fallback für falsche Keys / Leerzeichen
+  // 🔥 FIX für dein Problem (null / undefined / leer)
   if(price === undefined){
-    const fixedKey = Object.keys(item).find(k => k.trim() === label.trim());
-    if(fixedKey) price = item[fixedKey];
+    const fixed = Object.keys(item).find(k => k.trim() === label.trim());
+    if(fixed) price = item[fixed];
   }
 
-  // ❌ alles raus was kein echter Preis ist
   if(price === "" || price === null || price === undefined || isNaN(price)){
     return "";
   }
@@ -193,89 +155,110 @@ function row(item, label, key){
       <span>${label}: ${price}€</span>
       <div class="qty">
         <button onclick="change('${key}', -1)">-</button>
-        <span id="${key}">0</span>
+        <span id="${key}">${cart[key] || 0}</span>
         <button onclick="change('${key}', 1)">+</button>
       </div>
     </div>
   `;
 }
 
-/* CHANGE */
-function change(id, model, type, price, diff){
-  if(!cart[id]) cart[id] = {model, type, price, qty:0};
+function render(list){
+  let html = "";
 
-  cart[id].qty += diff;
+  list.forEach(item => {
+    let model = item["Modell"];
+    if(!model) return;
 
-  if(cart[id].qty <= 0){
-    delete cart[id];
-  }
+    let block = `
+      <div class="card">
+        <b>${model}</b>
+        ${row(item,"Display InCell", model+"-incell")}
+        ${row(item,"FHD", model+"-fhd")}
+        ${row(item,"Hard OLED", model+"-hard")}
+        ${row(item,"Soft OLED", model+"-soft")}
+        ${row(item,"Akku", model+"-akku")}
+        ${row(item,"Akku Diagnose", model+"-diag")}
+      </div>
+    `;
 
-  document.getElementById(id).innerText = cart[id]?.qty || 0;
+    html += block;
+  });
+
+  document.getElementById("list").innerHTML = html;
+  update();
+}
+
+function change(key, val){
+  cart[key] = (cart[key] || 0) + val;
+  if(cart[key] <= 0) delete cart[key];
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  let el = document.getElementById(key);
+  if(el) el.innerText = cart[key] || 0;
 
   update();
 }
 
-/* UPDATE */
 function update(){
   let total = 0;
 
-  Object.values(cart).forEach(i => {
-    total += i.qty * i.price;
-  });
-
-  document.getElementById("total").innerText = total;
-
-  /* 🔥 SPEICHERN */
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-/* 🔥 WIEDERHERSTELLEN */
-function restoreCartUI(){
   for(let key in cart){
-    let el = document.getElementById(key);
-    if(el){
-      el.innerText = cart[key].qty;
+    let [model,type] = key.split("-");
+    let item = data.find(i => i["Modell"] === model);
+
+    if(item){
+      let price = item[typeMap(type)];
+      if(!isNaN(price)) total += price * cart[key];
     }
   }
-  update();
+
+  document.getElementById("total").innerText = total;
 }
 
-/* SEND */
+function typeMap(type){
+  return {
+    incell:"Display InCell",
+    fhd:"FHD",
+    hard:"Hard OLED",
+    soft:"Soft OLED",
+    akku:"Akku",
+    diag:"Akku Diagnose"
+  }[type];
+}
+
 function send(){
   let text = "Bestellung:%0A";
 
-  Object.values(cart).forEach(i => {
-    text += `${i.qty}x ${i.model} ${i.type} (${i.price}€)%0A`;
-  });
+  for(let key in cart){
+    let [model,type] = key.split("-");
+    text += `${cart[key]}x ${model} ${type}%0A`;
+  }
 
-  let total = document.getElementById("total").innerText;
-  text += "%0AGesamt: " + total + "€%0A";
+  text += `%0AGesamt: ${document.getElementById("total").innerText}€`;
 
-  text += "Name: " + document.getElementById("name").value + "%0A";
-  text += "Notiz: " + document.getElementById("note").value;
+  let name = document.getElementById("name").value;
+  let note = document.getElementById("note").value;
 
-  let loc = document.getElementById("location").value;
+  if(name) text += `%0AName: ${name}`;
+  if(note) text += `%0ANotiz: ${note}`;
 
-  let number = loc === "kassel"
+  let location = document.getElementById("location").value;
+
+  let number = location === "kassel"
     ? "491772897314"
     : "4915238242082";
 
   window.open(`https://wa.me/${number}?text=${text}`);
-
-  /* 🔥 WARENKORB LEEREN */
-  localStorage.removeItem("cart");
-  cart = {};
-  location.reload();
 }
 
-/* SEARCH */
-document.getElementById("search").addEventListener("input", function(){
-  let val = this.value.toLowerCase();
-  document.querySelectorAll(".card").forEach(card => {
-    card.style.display = card.innerText.toLowerCase().includes(val) ? "block" : "none";
-  });
-});
-
+function search(val){
+  val = val.toLowerCase();
+  let filtered = data.filter(i =>
+    (i["Modell"] || "").toLowerCase().includes(val)
+  );
+  render(filtered);
+}
 </script>
 
 </body>
