@@ -10,141 +10,95 @@ body {
     background: #111;
     color: white;
     text-align: center;
+    margin: 0;
+    padding: 20px;
 }
 
 .logo {
     font-size: 32px;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.trade { color: red; }
-.station { color: white; }
-
-table {
-    width: 95%;
-    margin: 20px auto;
-    border-collapse: collapse;
+.trade {
+    color: red;
 }
 
-td, th {
-    border: 1px solid #333;
-    padding: 8px;
-}
-
-input {
-    width: 70px;
-    text-align: center;
-    background: transparent;
-    border: none;
+.station {
     color: white;
 }
 
-/* Nur Inputs sperren */
-.locked input {
-    pointer-events: none;
-    color: #888;
+h2 {
+    margin-bottom: 30px;
 }
 
-button {
-    padding: 10px;
-    margin: 10px;
-    font-size: 16px;
-    cursor: pointer;
+#preise {
+    max-width: 600px;
+    margin: auto;
 }
 
-.login-box {
-    margin-top: 20px;
+.card {
+    background: #222;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.card b {
+    font-size: 18px;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="logo">
-<span class="trade">trade</span><span class="station">station</span>
+    <span class="trade">trade</span><span class="station">station</span>
 </div>
 
 <h2>preisliste</h2>
 
-<div class="login-box">
-<input type="password" id="pass" placeholder="admin passwort">
-<br>
-<button onclick="login()">login</button>
-<button onclick="logout()">logout</button>
-</div>
-
-<table id="table" class="locked">
-<tr>
-<th>modell</th>
-<th>incell</th>
-<th>fhd</th>
-<th>hard oled</th>
-<th>soft oled</th>
-<th>akku</th>
-<th>diagnostic akku</th>
-</tr>
-
-<tr><td>iphone 8</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 8 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone x</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone xr</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone xs</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone xs max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 11</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 11 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 11 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 12</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 12 mini</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 12 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 12 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 13</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 13 mini</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 13 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 13 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 14</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 14 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 14 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 14 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 15</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 15 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 15 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 15 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 16</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 16 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 16 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 16 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-<tr><td>iphone 17</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 17 plus</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 17 pro</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-<tr><td>iphone 17 pro max</td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td><td><input></td></tr>
-
-</table>
+<div id="preise">lade daten...</div>
 
 <script>
-function login() {
-    let pass = document.getElementById("pass").value;
+async function ladePreise() {
 
-    if (pass === "1234") {
-        document.getElementById("table").classList.remove("locked");
-        alert("bearbeiten aktiviert");
-    } else {
-        alert("falsches passwort");
+    const url = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/Sheet1";
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        let output = "";
+
+        data.forEach(item => {
+
+            output += `
+            <div class="card">
+                <b>${item.Modell || "-"}</b><br><br>
+
+                incell: ${item["Display InCell"] || "-"} €<br>
+                fhd: ${item.FHD || "-"} €<br>
+                hard oled: ${item["Hard OLED"] || "-"} €<br>
+                soft oled: ${item["Soft OLED"] || "-"} €<br><br>
+
+                akku: ${item.Akku || "-"} €<br>
+                akku diagnose: ${item["Akku Diagnose"] || "-"} €
+            </div>
+            `;
+        });
+
+        document.getElementById("preise").innerHTML = output;
+
+    } catch (error) {
+        document.getElementById("preise").innerHTML = "fehler beim laden der daten";
+        console.error(error);
     }
 }
 
-function logout() {
-    document.getElementById("table").classList.add("locked");
-    document.getElementById("pass").value = "";
-    alert("bearbeiten deaktiviert");
-}
+ladePreise();
 </script>
 
 </body>
