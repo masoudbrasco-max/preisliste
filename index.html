@@ -176,19 +176,28 @@ function render(data){
 /* ROW */
 function row(item, label, key){
   let price = item[label];
-  if(price === "" || price === undefined) return "";
 
-  let id = item.Modell + "-" + key;
+  // 🔥 WICHTIG: fallback für falsche Keys / Leerzeichen
+  if(price === undefined){
+    const fixedKey = Object.keys(item).find(k => k.trim() === label.trim());
+    if(fixedKey) price = item[fixedKey];
+  }
+
+  // ❌ alles raus was kein echter Preis ist
+  if(price === "" || price === null || price === undefined || isNaN(price)){
+    return "";
+  }
 
   return `
-  <div class="row">
-    <span>${label}: ${price}€</span>
-    <div class="controls">
-      <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},-1)">-</button>
-      <span class="qty" id="${id}">0</span>
-      <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},1)">+</button>
+    <div class="row">
+      <span>${label}: ${price}€</span>
+      <div class="qty">
+        <button onclick="change('${key}', -1)">-</button>
+        <span id="${key}">0</span>
+        <button onclick="change('${key}', 1)">+</button>
+      </div>
     </div>
-  </div>`;
+  `;
 }
 
 /* CHANGE */
