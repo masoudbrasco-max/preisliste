@@ -28,7 +28,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Suche */
 .search {
     width: 100%;
     padding: 10px;
@@ -37,7 +36,6 @@ h2 {
     border: none;
 }
 
-/* Karten */
 .card {
     background: #222;
     padding: 15px;
@@ -45,7 +43,6 @@ h2 {
     border-radius: 10px;
 }
 
-/* Produkt Zeile */
 .row {
     display: flex;
     justify-content: space-between;
@@ -53,7 +50,6 @@ h2 {
     margin: 5px 0;
 }
 
-/* Buttons */
 .controls {
     display: flex;
     align-items: center;
@@ -75,7 +71,6 @@ h2 {
     text-align: center;
 }
 
-/* Warenkorb */
 .cart {
     position: fixed;
     bottom: 0;
@@ -101,7 +96,6 @@ h2 {
     color: white;
     font-size: 16px;
 }
-
 </style>
 </head>
 
@@ -115,7 +109,7 @@ h2 {
 
 <input class="search" placeholder="suche iphone..." onkeyup="search()">
 
-<div id="list"></div>
+<div id="list">lade daten...</div>
 
 <div class="cart">
     <div>gesamt: <span id="total">0</span> €</div>
@@ -126,7 +120,7 @@ h2 {
 
 <script>
 
-// GOOGLE SHEETS LINK (DEINER IST SCHON DRIN)
+// ❗ HIER ggf. TAB NAMEN ÄNDERN (Sheet1 / Tabelle1)
 const sheetURL = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/Sheet1";
 
 let cart = {};
@@ -134,7 +128,18 @@ let cart = {};
 fetch(sheetURL)
 .then(res => res.json())
 .then(data => {
+    console.log("DATA:", data);
+
+    if(!data || data.length === 0){
+        document.getElementById("list").innerHTML = "❌ keine daten gefunden (sheet prüfen)";
+        return;
+    }
+
     render(data);
+})
+.catch(err => {
+    console.error(err);
+    document.getElementById("list").innerHTML = "❌ fehler beim laden (freigabe prüfen)";
 });
 
 function render(data){
@@ -179,7 +184,10 @@ function changeQty(model, type, price, change){
 
     cart[key].qty += change;
 
-    if(cart[key].qty <= 0) delete cart[key];
+    if(cart[key].qty <= 0){
+        delete cart[key];
+        document.getElementById(model + "-" + type).innerText = 0;
+    }
 
     update();
 }
