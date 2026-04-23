@@ -2,99 +2,67 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>tradestation preisliste</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preisliste</title>
 
 <style>
 body {
-    font-family: Arial;
     background: #111;
     color: white;
-    margin: 0;
-    padding: 15px;
-    padding-bottom: 260px;
+    font-family: Arial;
+    text-align: center;
 }
 
 .logo {
-    text-align: center;
     font-size: 28px;
     font-weight: bold;
+    margin-top: 20px;
 }
 
 .trade { color: red; }
 .station { color: white; }
 
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.search {
-    width: 100%;
+#search {
+    width: 90%;
     padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 8px;
+    margin: 20px;
+    border-radius: 10px;
     border: none;
 }
 
 .card {
     background: #222;
+    margin: 10px;
     padding: 15px;
-    margin-bottom: 12px;
     border-radius: 10px;
+    text-align: left;
 }
 
-.row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 5px 0;
-}
-
-.controls {
-    display: flex;
-    align-items: center;
-}
-
-.btn {
+button {
     background: red;
     border: none;
     color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    margin: 0 3px;
-    font-size: 18px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-left: 5px;
 }
 
-.qty {
-    width: 30px;
-    text-align: center;
-}
-
-.cart {
+.bottom {
     position: fixed;
     bottom: 0;
-    left: 0;
     width: 100%;
-    background: #000;
-    padding: 15px;
-    border-top: 2px solid red;
+    background: black;
+    padding: 10px;
 }
 
-.cart input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-}
-
-.cart button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
+.whatsapp {
     background: green;
+    width: 95%;
+    padding: 10px;
+    border-radius: 10px;
     border: none;
     color: white;
-    font-size: 16px;
+    margin-top: 10px;
 }
 </style>
 </head>
@@ -102,92 +70,51 @@ h2 {
 <body>
 
 <div class="logo">
-    <span class="trade">trade</span><span class="station">station</span>
+<span class="trade">trade</span><span class="station">station</span>
 </div>
 
-<h2>preisliste</h2>
+<h3>preisliste</h3>
 
-<input class="search" placeholder="suche iphone..." onkeyup="search()">
+<input type="text" id="search" placeholder="suche iphone...">
 
 <div id="list">lade daten...</div>
 
-<div class="cart">
-    <div>gesamt: <span id="total">0</span> €</div>
-    <input id="name" placeholder="dein name">
-    <input id="note" placeholder="notiz (optional)">
-    <button onclick="sendWhatsApp()">📲 Bestellung senden</button>
+<div class="bottom">
+<div id="total">gesamt: 0 €</div>
+<input id="name" placeholder="dein name">
+<input id="note" placeholder="notiz (optional)">
+<button class="whatsapp" onclick="sendWhatsApp()">Bestellung senden</button>
 </div>
 
 <script>
-
-// ❗ HIER ggf. TAB NAMEN ÄNDERN (Sheet1 / Tabelle1)
-<script>
 const sheetURL = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/iphone_preise";
-
-function getValue(obj, key) {
-    return obj[key] || obj[key.toLowerCase()] || obj[key.toUpperCase()] || "-";
-}
-
-fetch(sheetURL)
-.then(res => res.json())
-.then(data => {
-    const container = document.getElementById("preisliste");
-    container.innerHTML = "";
-
-    data.forEach(item => {
-        const modell = getValue(item, "modell");
-
-        const html = `
-        <div class="card">
-            <h3>${modell}</h3>
-            <p>incell: ${getValue(item,"incell")} €</p>
-            <p>fhd: ${getValue(item,"fhd")} €</p>
-            <p>hard oled: ${getValue(item,"hard oled")} €</p>
-            <p>soft oled: ${getValue(item,"soft oled")} €</p>
-            <p>akku: ${getValue(item,"akku")} €</p>
-            <p>diagnostic akku: ${getValue(item,"diagnostic akku")} €</p>
-        </div>
-        `;
-        container.innerHTML += html;
-    });
-})
-.catch(err => {
-    document.getElementById("preisliste").innerHTML = "Fehler beim Laden";
-});
-</script>
 
 let cart = {};
 
 fetch(sheetURL)
 .then(res => res.json())
 .then(data => {
-    console.log("DATA:", data);
-
-    if(!data || data.length === 0){
-        document.getElementById("list").innerHTML = "❌ keine daten gefunden (sheet prüfen)";
-        return;
-    }
-
     render(data);
 })
-.catch(err => {
-    console.error(err);
-    document.getElementById("list").innerHTML = "❌ fehler beim laden (freigabe prüfen)";
+.catch(() => {
+    document.getElementById("list").innerHTML = "❌ Fehler beim Laden";
 });
 
 function render(data){
     let html = "";
 
     data.forEach(item => {
+
         html += `
         <div class="card">
-            <b>${item.modell}</b>
-            ${row(item, "incell")}
-            ${row(item, "fhd")}
-            ${row(item, "hard oled")}
-            ${row(item, "soft oled")}
-            ${row(item, "akku")}
-            ${row(item, "diagnostic akku")}
+            <b>${item.Modell}</b><br>
+
+            ${row(item,"Display InCell")}
+            ${row(item,"FHD")}
+            ${row(item,"Hard OLED")}
+            ${row(item,"Soft OLED")}
+            ${row(item,"Akku")}
+            ${row(item,"Akku Diagnose")}
         </div>
         `;
     });
@@ -195,73 +122,68 @@ function render(data){
     document.getElementById("list").innerHTML = html;
 }
 
-function row(item, type){
-    if(!item[type] || item[type] === "-") return "";
+function row(item,type){
+    if(!item[type]) return "";
+
+    const key = item.Modell + "-" + type;
 
     return `
-    <div class="row">
-        <span>${type}: ${item[type]}€</span>
-        <div class="controls">
-            <button class="btn" onclick="changeQty('${item.modell}','${type}', ${item[type]}, -1)">-</button>
-            <span id="${item.modell}-${type}" class="qty">0</span>
-            <button class="btn" onclick="changeQty('${item.modell}','${type}', ${item[type]}, 1)">+</button>
-        </div>
-    </div>
+    ${type}: ${item[type]}€
+    <button onclick="change('${item.Modell}','${type}',${item[type]},-1)">-</button>
+    <span id="${key}">0</span>
+    <button onclick="change('${item.Modell}','${type}',${item[type]},1)">+</button>
+    <br>
     `;
 }
 
-function changeQty(model, type, price, change){
-    const key = model + "-" + type;
+function change(model,type,price,change){
+    const key = model+"-"+type;
 
-    if(!cart[key]) cart[key] = {model, type, price, qty:0};
+    if(!cart[key]){
+        cart[key] = {model,type,price,qty:0};
+    }
 
     cart[key].qty += change;
 
     if(cart[key].qty <= 0){
         delete cart[key];
-        document.getElementById(model + "-" + type).innerText = 0;
     }
 
-    update();
+    document.getElementById(key).innerText = cart[key]?.qty || 0;
+
+    updateTotal();
 }
 
-function update(){
+function updateTotal(){
     let total = 0;
 
-    for(let key in cart){
-        let item = cart[key];
-        total += item.price * item.qty;
-
-        document.getElementById(item.model + "-" + item.type).innerText = item.qty;
+    for(let k in cart){
+        total += cart[k].price * cart[k].qty;
     }
 
-    document.getElementById("total").innerText = total;
+    document.getElementById("total").innerText = "gesamt: " + total + " €";
 }
 
 function sendWhatsApp(){
-    let text = "bestellung:%0A";
+    let text = "Bestellung:\n";
 
-    for(let key in cart){
-        let i = cart[key];
-        text += `${i.qty}x ${i.model} ${i.type} = ${i.price*i.qty}€%0A`;
+    for(let k in cart){
+        let i = cart[k];
+        text += `${i.qty}x ${i.model} ${i.type} (${i.price}€)\n`;
     }
 
-    text += "%0Agesamt: " + document.getElementById("total").innerText + "€";
-    text += "%0Aname: " + document.getElementById("name").value;
-    text += "%0Anotiz: " + document.getElementById("note").value;
+    text += "\nName: " + document.getElementById("name").value;
+    text += "\nNotiz: " + document.getElementById("note").value;
 
-    window.open("https://wa.me/4915238242082?text=" + text);
+    window.open("https://wa.me/4915238242082?text=" + encodeURIComponent(text));
 }
 
-function search(){
-    let input = document.querySelector(".search").value.toLowerCase();
-    let cards = document.querySelectorAll(".card");
-
-    cards.forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(input) ? "block" : "none";
+document.getElementById("search").addEventListener("input", function(){
+    const val = this.value.toLowerCase();
+    document.querySelectorAll(".card").forEach(c=>{
+        c.style.display = c.innerText.toLowerCase().includes(val) ? "block" : "none";
     });
-}
-
+});
 </script>
 
 </body>
