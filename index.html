@@ -20,21 +20,22 @@ body {
     margin-bottom: 10px;
 }
 
-.trade {
-    color: red;
-}
-
-.station {
-    color: white;
-}
+.trade { color: red; }
+.station { color: white; }
 
 h2 {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
-#preise {
-    max-width: 600px;
-    margin: auto;
+table {
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #333;
+    padding: 8px;
 }
 
 .card {
@@ -44,14 +45,9 @@ h2 {
     border-radius: 10px;
     text-align: left;
 }
-
-.card b {
-    font-size: 18px;
-}
 </style>
 
 </head>
-
 <body>
 
 <div class="logo">
@@ -60,45 +56,45 @@ h2 {
 
 <h2>preisliste</h2>
 
-<div id="preise">lade daten...</div>
+<div id="content">
+    lade daten...
+</div>
 
 <script>
-async function ladePreise() {
+const sheetURL = "https://docs.google.com/spreadsheets/d/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/gviz/tq?tqx=out:json";
 
-    const url = "https://opensheet.elk.sh/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/Sheet1";
+fetch(sheetURL)
+.then(res => res.text())
+.then(data => {
+    const json = JSON.parse(data.substring(47).slice(0, -2));
+    const rows = json.table.rows;
 
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
+    let html = "";
 
-        let output = "";
+    rows.forEach(row => {
+        let cols = row.c;
 
-        data.forEach(item => {
+        if (!cols || !cols[0]) return;
 
-            output += `
-            <div class="card">
-                <b>${item.Modell || "-"}</b><br><br>
+        html += `
+        <div class="card">
+            <strong>${cols[0]?.v || ""}</strong><br>
+            incell: ${cols[1]?.v || "-"} €<br>
+            fhd: ${cols[2]?.v || "-"} €<br>
+            hard oled: ${cols[3]?.v || "-"} €<br>
+            soft oled: ${cols[4]?.v || "-"} €<br>
+            akku: ${cols[5]?.v || "-"} €<br>
+            diagnostic akku: ${cols[6]?.v || "-"} €
+        </div>
+        `;
+    });
 
-                incell: ${item["Display InCell"] || "-"} €<br>
-                fhd: ${item.FHD || "-"} €<br>
-                hard oled: ${item["Hard OLED"] || "-"} €<br>
-                soft oled: ${item["Soft OLED"] || "-"} €<br><br>
-
-                akku: ${item.Akku || "-"} €<br>
-                akku diagnose: ${item["Akku Diagnose"] || "-"} €
-            </div>
-            `;
-        });
-
-        document.getElementById("preise").innerHTML = output;
-
-    } catch (error) {
-        document.getElementById("preise").innerHTML = "fehler beim laden der daten";
-        console.error(error);
-    }
-}
-
-ladePreise();
+    document.getElementById("content").innerHTML = html;
+})
+.catch(err => {
+    document.getElementById("content").innerHTML = "fehler beim laden der daten";
+    console.error(err);
+});
 </script>
 
 </body>
