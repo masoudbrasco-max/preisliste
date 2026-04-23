@@ -11,8 +11,6 @@ body {
   font-family: Arial;
   background: #000;
   color: white;
-
-  /* 🔥 FIX gegen Überlappung */
   padding-bottom: 220px;
 }
 
@@ -73,7 +71,6 @@ input, select {
   text-align: center;
 }
 
-/* Bottom Bar */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -106,16 +103,11 @@ button.send {
 <h2>preisliste</h2>
 
 <div class="container">
-
 <input id="search" placeholder="suche iphone...">
-
 <div id="list"></div>
-
 </div>
 
-<!-- Bottom -->
 <div class="bottom-bar">
-
 <div class="total">gesamt: <span id="total">0</span> €</div>
 
 <select id="location">
@@ -127,35 +119,36 @@ button.send {
 <input id="note" placeholder="notiz (optional)">
 
 <button class="send" onclick="send()">Bestellung senden</button>
-
 </div>
 
 <script>
 
-/* ✅ DEIN SHEET (KORREKT UMGEBAUT) */
 const sheetURL = "https://docs.google.com/spreadsheets/d/1siE-XT8Sprgn-GxBk1Q6j8XVsXDDu7r8DcshLTNfZlU/gviz/tq?tqx=out:json&sheet=iphone_preise";
 
+/* 🔥 LOCAL STORAGE LADEN */
 let cart = {};
+let saved = localStorage.getItem("cart");
+if(saved){
+  cart = JSON.parse(saved);
+}
 
 fetch(sheetURL)
 .then(res => res.text())
 .then(text => {
   const json = JSON.parse(text.substring(47).slice(0, -2));
-  const rows = json.table.rows.map(r => {
-    return {
-      Modell: r.c[0]?.v,
-      "Display InCell": r.c[1]?.v,
-      FHD: r.c[2]?.v,
-      "Hard OLED": r.c[3]?.v,
-      "Soft OLED": r.c[4]?.v,
-      Akku: r.c[5]?.v,
-      "Akku Diagnose": r.c[6]?.v
-    };
-  });
+  const rows = json.table.rows.map(r => ({
+    Modell: r.c[0]?.v,
+    "Display InCell": r.c[1]?.v,
+    FHD: r.c[2]?.v,
+    "Hard OLED": r.c[3]?.v,
+    "Soft OLED": r.c[4]?.v,
+    Akku: r.c[5]?.v,
+    "Akku Diagnose": r.c[6]?.v
+  }));
   render(rows);
 })
 .catch(() => {
-  document.getElementById("list").innerHTML = "❌ fehler beim laden (freigabe prüfen)";
+  document.getElementById("list").innerHTML = "❌ fehler beim laden";
 });
 
 function render(data){
@@ -172,55 +165,73 @@ function render(data){
     rows += row(item, "Akku", "akku");
     rows += row(item, "Akku Diagnose", "diag");
 
-    if(!rows) rows = "<div style='opacity:0.5'>Keine Preise verfügbar</div>";
-
-    html += `
-      <div class="card">
-        <b>${item.Modell}</b>
-        ${rows}
-      </div>
-    `;
+    html += `<div class="card"><b>${item.Modell}</b>${rows}</div>`;
   });
 
   document.getElementById("list").innerHTML = html;
+
+  restoreCartUI();
 }
 
+/* ROW */
 function row(item, label, key){
   let price = item[label];
-  if(price === "" || price === undefined || price === null) return "";
+  if(price === "" || price === undefined) return "";
 
   let id = item.Modell + "-" + key;
 
   return `
-    <div class="row">
-      <span>${label}: ${price}€</span>
-      <div class="controls">
-        <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},-1)">-</button>
-        <span class="qty" id="${id}">0</span>
-        <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},1)">+</button>
-      </div>
+  <div class="row">
+    <span>${label}: ${price}€</span>
+    <div class="controls">
+      <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},-1)">-</button>
+      <span class="qty" id="${id}">0</span>
+      <button class="btn" onclick="change('${id}','${item.Modell}','${label}',${price},1)">+</button>
     </div>
-  `;
+  </div>`;
 }
 
+/* CHANGE */
 function change(id, model, type, price, diff){
   if(!cart[id]) cart[id] = {model, type, price, qty:0};
 
   cart[id].qty += diff;
 
-  if(cart[id].qty <= 0) delete cart[id];
+  if(cart[id].qty <= 0){
+    delete cart[id];
+  }
 
-  document.getElementById(id).innerText = cart[id] ? cart[id].qty : 0;
+  document.getElementById(id).innerText = cart[id]?.qty || 0;
 
   update();
 }
 
+/* UPDATE */
 function update(){
   let total = 0;
-  Object.values(cart).forEach(i => total += i.qty * i.price);
+
+  Object.values(cart).forEach(i => {
+    total += i.qty * i.price;
+  });
+
   document.getElementById("total").innerText = total;
+
+  /* 🔥 SPEICHERN */
+  localStorage.setItem("cart", JSON.stringify(cart));
 }
 
+/* 🔥 WIEDERHERSTELLEN */
+function restoreCartUI(){
+  for(let key in cart){
+    let el = document.getElementById(key);
+    if(el){
+      el.innerText = cart[key].qty;
+    }
+  }
+  update();
+}
+
+/* SEND */
 function send(){
   let text = "Bestellung:%0A";
 
@@ -241,8 +252,14 @@ function send(){
     : "4915238242082";
 
   window.open(`https://wa.me/${number}?text=${text}`);
+
+  /* 🔥 WARENKORB LEEREN */
+  localStorage.removeItem("cart");
+  cart = {};
+  location.reload();
 }
 
+/* SEARCH */
 document.getElementById("search").addEventListener("input", function(){
   let val = this.value.toLowerCase();
   document.querySelectorAll(".card").forEach(card => {
